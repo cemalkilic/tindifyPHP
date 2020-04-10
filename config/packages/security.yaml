@@ -1,0 +1,13 @@
+security:
+  firewalls:
+    main:
+      pattern: ^/
+#      anonymous: lazy
+      logout: ~
+      guard:
+        authenticators:
+          - App\Security\Authenticator
+
+  providers:
+    spotifyUserProvider:
+      id: App\Security\UserProvider
