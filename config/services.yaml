@@ -4,6 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
+    spotifyApi.class: 'SpotifyWebAPI\SpotifyWebAPI'
     spotifyApi.clientID: '%env(SPOTIFY_CLIENT_ID)%'
     spotifyApi.clientSecret: '%env(SPOTIFY_CLIENT_SECRET)%'
     spotifyApi.redirectUri: '%env(SPOTIFY_REDIRECT_URI)%'
@@ -25,6 +26,10 @@ services:
     App\Controller\:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
+
+    spotifyApiService:
+        class: "%spotifyApi.class%"
+    SpotifyWebAPI\SpotifyWebAPI: '@spotifyApiService'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
