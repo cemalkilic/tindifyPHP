@@ -5,6 +5,8 @@
         "php": "^7.2.5",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "doctrine/doctrine-bundle": "^2.0",
+        "doctrine/orm": "^2.7",
         "jwilsson/spotify-web-api-php": "^3.3",
         "symfony/console": "5.0.*",
         "symfony/dotenv": "5.0.*",
