@@ -4,3 +4,6 @@ authCallback:
   methods: GET
   path: /authCallback
 
+playlists:
+  path: /playlists
+  controller: App\Controller\PlaylistController::getUserPlaylists
