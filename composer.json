@@ -14,8 +14,10 @@
         "symfony/framework-bundle": "5.0.*",
         "symfony/security-bundle": "5.0.*",
         "symfony/security-guard": "5.0.*",
+        "symfony/twig-pack": "^1.0",
         "symfony/webpack-encore-bundle": "^1.7",
-        "symfony/yaml": "5.0.*"
+        "symfony/yaml": "5.0.*",
+        "twig/twig": "^2.0"
     },
     "require-dev": {
         "symfony/maker-bundle": "^1.15"
