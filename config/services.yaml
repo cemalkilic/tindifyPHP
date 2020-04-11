@@ -31,5 +31,10 @@ services:
         class: "%spotifyApi.class%"
     SpotifyWebAPI\SpotifyWebAPI: '@spotifyApiService'
 
+    kernel.event_listener.json_request_transformer:
+        class: App\Service\JsonRequestTransformerListener
+        tags:
+            - { name: "kernel.event_listener", event: "kernel.request", method: "onKernelRequest", priority: "100" }
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
