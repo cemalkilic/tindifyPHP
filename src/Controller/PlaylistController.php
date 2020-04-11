@@ -83,4 +83,35 @@ class PlaylistController extends AbstractController {
 
         return JsonResponse::create($res);
     }
+
+    public function getPlaylistSongs(Request $request) {
+        $res = [
+            "success" => false,
+            "message" => "Playlist songs",
+            "content" => []
+        ];
+
+        $playlistID = $request->attributes->get('id', null);
+        $limit      = $request->request->get('limit', 20);
+        $offset     = $request->request->get('offset', 0);
+
+        $options = compact('limit', 'offset');
+
+        // TODO make the field filtering more generic!
+        $options['fields'] = [
+            "limit,offset,total", // for succeeding requests
+            "items.track(id,is_local,name,popularity,preview_url,uri)", // song related
+            "items.track.album(id,images,name,uri)", // album related
+            "items.track.artists(id,name,uri)" // artist related
+        ];
+
+        try {
+            $res['content'] = $this->api->getPlaylistTracks($playlistID, $options);
+            $res['success'] = true;
+        } catch (SpotifyWebAPIException $e) {
+            $res['message'] = $e->getReason() ?? $e->getMessage();
+        }
+
+        return JsonResponse::create($res);
+    }
 }

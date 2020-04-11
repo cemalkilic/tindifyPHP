@@ -17,3 +17,8 @@ add-song-to-playlist:
   path:       /playlist/{id}/songs
   controller: App\Controller\PlaylistController::addSongsToPlaylist
   methods:    POST
+
+get-playlist-songs:
+  path:       /playlist/{id}/songs
+  controller: App\Controller\PlaylistController::getPlaylistSongs
+  methods:    GET
