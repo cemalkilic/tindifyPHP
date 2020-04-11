@@ -34,8 +34,8 @@ class PlaylistController extends AbstractController {
 
     public function createTindifyPlaylist(Request $request) {
 
-        $playlistName = $request->get("name") ?? "Tindify";
-        $isPublic     = $request->get("public") ?? false;
+        $playlistName = $request->request->get("name") ?? "Tindify";
+        $isPublic     = $request->request->get("public") ?? false;
 
         $playlistOptions = [
             "name"        => $playlistName,
@@ -44,18 +44,41 @@ class PlaylistController extends AbstractController {
         ];
 
         $res = [
-            "success" => true,
+            "success" => false,
             "message" => "Playlist created: " . $playlistName,
             "content" => []
         ];
 
         try {
             $res['content'] = $this->api->createPlaylist($playlistOptions);
+            $res['success'] = true;
         } catch (SpotifyWebAPIException $e) {
-            $res = [
-                "success" => false,
-                "message" => $e->getReason() ?? $e->getMessage()
-            ];
+            $res['message'] =$e->getReason() ?? $e->getMessage();
+        }
+
+        return JsonResponse::create($res);
+    }
+
+    public function addSongsToPlaylist(Request $request) {
+        $res = [
+            "success" => false,
+            "message" => "Song(s) added to playlist!",
+            "content" => []
+        ];
+
+        $playlistID = $request->attributes->get('id', null);
+        $songIDs    = $request->request->get('songIDs', null);
+
+        if (empty($songIDs)) {
+            $res['message'] = "No song ID given!";
+            return JsonResponse::create($res, 400);
+        }
+
+        try {
+            $res['content'] = $this->api->addPlaylistTracks($playlistID, $songIDs);
+            $res['success'] = true;
+        } catch (SpotifyWebAPIException $e) {
+            $res['message'] = $e->getReason() ?? $e->getMessage();
         }
 
         return JsonResponse::create($res);

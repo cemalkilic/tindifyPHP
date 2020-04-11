@@ -12,3 +12,8 @@ playlist-create:
   path:       /playlist
   controller: App\Controller\PlaylistController::createTindifyPlaylist
   methods:    POST
+
+add-song-to-playlist:
+  path:       /playlist/{id}/songs
+  controller: App\Controller\PlaylistController::addSongsToPlaylist
+  methods:    POST
