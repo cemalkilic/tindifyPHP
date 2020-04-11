@@ -25,6 +25,11 @@ get-playlist-songs:
 
 
 ## Song related
+get-recommended-songs:
+  path:       /song/recommendations
+  controller: App\Controller\SongController::getRecommendations
+  methods:    POST
+
 get-a-song:
   path:       /song/{id}
   controller: App\Controller\SongController::getSong
