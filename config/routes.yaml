@@ -7,3 +7,8 @@ authCallback:
 playlists:
   path: /playlists
   controller: App\Controller\PlaylistController::getUserPlaylists
+
+playlist-create:
+  path:       /playlist
+  controller: App\Controller\PlaylistController::createTindifyPlaylist
+  methods:    POST
