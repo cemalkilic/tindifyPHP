@@ -22,3 +22,10 @@ get-playlist-songs:
   path:       /playlist/{id}/songs
   controller: App\Controller\PlaylistController::getPlaylistSongs
   methods:    GET
+
+
+## Song related
+get-a-song:
+  path:       /song/{id}
+  controller: App\Controller\SongController::getSong
+  methods:    GET
