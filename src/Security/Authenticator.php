@@ -97,7 +97,7 @@ class Authenticator implements AuthenticatorInterface {
         // if user has code in the param
         // hopefully for now!
         $code = $request->query->get("code");
-        if ($code !== null) {
+        if ($request->getPathInfo() === "/authCallback" && $code !== null) {
             $spotifySession->requestAccessToken($code);
             $accessToken = $spotifySession->getAccessToken();
 
