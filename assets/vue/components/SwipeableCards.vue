@@ -90,7 +90,7 @@
         },
         mounted () {
             axios
-                .get('/playlist/<>/songs')
+                .get('/playlist/6BZtUvgDkQhH6SIM3vWz7D/songs')
                 .then(response => (this.cards = response.data.content.items))
         },
         computed: {
