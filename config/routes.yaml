@@ -1,4 +1,9 @@
 
+index:
+  methods: GET
+  path: /
+  controller: App\Controller\IndexController::index
+
 # just a place holder for now
 authCallback:
   methods: GET
