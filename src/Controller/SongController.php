@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 
+use App\Model\Song;
 use SpotifyWebAPI\SpotifyWebAPI;
 use SpotifyWebAPI\SpotifyWebAPIException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,40 +29,29 @@ class SongController extends AbstractController {
     }
 
     public function getSong(Request $request) {
-        $res = [
-            "success" => false,
-            "message" => "Song details",
-            "content" => []
-        ];
 
         $songID = $request->attributes->get('id', null);
 
         try {
-            $res['content'] = $this->api->getTrack($songID);
-            $res['success'] = true;
+            $song = $this->api->getTrack($songID);
+            $song = Song::createFromTrackDetails($song);
+            return JsonResponse::create($song->serializeToArray());
         } catch (SpotifyWebAPIException $e) {
-            $res['message'] = $e->getReason() ?? $e->getMessage();
+            $errorDetails = $e->getReason() ?? $e->getMessage();
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return JsonResponse::create($res);
     }
 
     public function getRecommendations(Request $request) {
-        $res = [
-            "success" => false,
-            "message" => "Get recommended songs based on the given songs!",
-            "content" => []
-        ];
-
         $seedSongs = $request->request->get('seedSongs', null);
         if (empty($seedSongs)) {
-            $res['message'] = "No seed songs givens!";
-            return JsonResponse::create($res, 400);
+            $errorDetails = "No seed songs givens!";
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_BAD_REQUEST);
         }
 
         if (!is_array($seedSongs)) {
-            $res['message'] = "Seed songs should be given as an array of songs IDs!";
-            return JsonResponse::create($res, 400);
+            $errorDetails = "Seed songs should be given as an array of songs IDs!";
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_BAD_REQUEST);
         }
 
         $options = [
@@ -70,13 +60,18 @@ class SongController extends AbstractController {
         ];
 
         try {
-            $res['content'] = $this->api->getRecommendations($options);
-            $res['success'] = true;
-        } catch (SpotifyWebAPIException $e) {
-            $res['message'] = $e->getReason() ?? $e->getMessage();
-        }
+            $songs = $this->api->getRecommendations($options);
 
-        return JsonResponse::create($res);
+            $songs->tracks = array_map(function($item) {
+                $song = Song::createFromTrackDetails($item);
+                return $song->serializeToArray();
+            }, $songs->tracks);
+
+            return JsonResponse::create($songs);
+        } catch (SpotifyWebAPIException $e) {
+            $errorDetails = $e->getReason() ?? $e->getMessage();
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

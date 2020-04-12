@@ -4,6 +4,7 @@
 namespace App\Controller;
 
 
+use App\Model\Song;
 use SpotifyWebAPI\SpotifyWebAPI;
 use SpotifyWebAPI\SpotifyWebAPIException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -28,8 +29,15 @@ class PlaylistController extends AbstractController {
     }
 
     public function getUserPlaylists() {
-        $res = $this->api->getMyPlaylists(["limit" => 5]);
-        return JsonResponse::create($res->items);
+
+        try {
+            $content = $this->api->getMyPlaylists(["limit" => 5]);
+            return JsonResponse::create($content);
+        } catch (SpotifyWebAPIException $e) {
+            $errorDetails = $e->getReason() ?? $e->getMessage();
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     public function createTindifyPlaylist(Request $request) {
@@ -43,53 +51,35 @@ class PlaylistController extends AbstractController {
             "description" => "The songs you matched!"
         ];
 
-        $res = [
-            "success" => false,
-            "message" => "Playlist created: " . $playlistName,
-            "content" => []
-        ];
-
         try {
-            $res['content'] = $this->api->createPlaylist($playlistOptions);
-            $res['success'] = true;
+            $content = $this->api->createPlaylist($playlistOptions);
+            return JsonResponse::create($content);
         } catch (SpotifyWebAPIException $e) {
-            $res['message'] =$e->getReason() ?? $e->getMessage();
+            $errorDetails = $e->getReason() ?? $e->getMessage();
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return JsonResponse::create($res);
     }
 
     public function addSongsToPlaylist(Request $request) {
-        $res = [
-            "success" => false,
-            "message" => "Song(s) added to playlist!",
-            "content" => []
-        ];
 
         $playlistID = $request->attributes->get('id', null);
         $songIDs    = $request->request->get('songIDs', null);
 
         if (empty($songIDs)) {
-            $res['message'] = "No song ID given!";
-            return JsonResponse::create($res, 400);
+            $errorDetails = "No song ID given!";
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_BAD_REQUEST);
         }
 
         try {
-            $res['content'] = $this->api->addPlaylistTracks($playlistID, $songIDs);
-            $res['success'] = true;
+            $content = $this->api->addPlaylistTracks($playlistID, $songIDs);
+            return JsonResponse::create($content);
         } catch (SpotifyWebAPIException $e) {
-            $res['message'] = $e->getReason() ?? $e->getMessage();
+            $errorDetails = $e->getReason() ?? $e->getMessage();
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return JsonResponse::create($res);
     }
 
     public function getPlaylistSongs(Request $request) {
-        $res = [
-            "success" => false,
-            "message" => "Playlist songs",
-            "content" => []
-        ];
 
         $playlistID = $request->attributes->get('id', null);
         $limit      = $request->request->get('limit', 20);
@@ -106,12 +96,17 @@ class PlaylistController extends AbstractController {
         ];
 
         try {
-            $res['content'] = $this->api->getPlaylistTracks($playlistID, $options);
-            $res['success'] = true;
-        } catch (SpotifyWebAPIException $e) {
-            $res['message'] = $e->getReason() ?? $e->getMessage();
-        }
+            $songs = $this->api->getPlaylistTracks($playlistID, $options);
 
-        return JsonResponse::create($res);
+            $songs->items = array_map(function($item) {
+                $song = Song::createFromTrackDetails($item->track);
+                return $song->serializeToArray();
+            }, $songs->items);
+
+            return JsonResponse::create($songs);
+        } catch (SpotifyWebAPIException $e) {
+            $errorDetails = $e->getReason() ?? $e->getMessage();
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
