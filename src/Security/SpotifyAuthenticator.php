@@ -2,8 +2,10 @@
 
 namespace App\Security;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -14,17 +16,18 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Guard\AuthenticatorInterface;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 
-class Authenticator implements AuthenticatorInterface {
+class SpotifyAuthenticator implements AuthenticatorInterface {
 
-    // TODO: Will be used later
     const TOKEN_NAME = "X-AUTH-TOKEN";
+    const TOKEN_VALUE_SECRET = "veryBasicSecurity";
 
     private $params;
+    private $em;
     private $session;
 
-    public function __construct(ContainerBagInterface $params,
-                                SessionInterface $session) {
+    public function __construct(ContainerBagInterface $params, EntityManagerInterface $em, SessionInterface $session) {
         $this->params = $params;
+        $this->em = $em;
         $this->session = $session;
     }
 
@@ -42,7 +45,7 @@ class Authenticator implements AuthenticatorInterface {
      * to be skipped.
      */
     public function supports(Request $request) {
-        return $request->headers->has(self::TOKEN_NAME) || $this->session->has('spotify_user');
+        return $request->getPathInfo() === "/authCallback" && $request->query->has("code");
     }
 
     /**
@@ -50,17 +53,21 @@ class Authenticator implements AuthenticatorInterface {
      * be passed to getUser() as $credentials.
      */
     public function getCredentials(Request $request) {
-        return $request->headers->get(self::TOKEN_NAME) ?? $this->session->get('spotify_user');
+        return $request->query->get("code", null);
     }
 
-    public function getUser($credentials, UserProviderInterface $userProvider) {
-        if (null === $credentials) {
+    public function getUser($authorizationCode, UserProviderInterface $userProvider) {
+        if (null === $authorizationCode) {
             // The token header was empty, authentication fails with HTTP Status
             // Code 401 "Unauthorized"
             return null;
         }
 
-        return $userProvider->loadUserByUsername($credentials);
+        $user = $userProvider->loadUserByUsername($authorizationCode);
+        $this->session->set('spotify_user', $user);
+
+        // if a User is returned, checkCredentials() is called
+        return $user;
     }
 
     public function checkCredentials($credentials, UserInterface $user) {
@@ -72,8 +79,8 @@ class Authenticator implements AuthenticatorInterface {
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
-        // on success, let the request continue
-        return null;
+        // user is authenticated, return it to homepage
+        return new RedirectResponse("/");
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception) {
@@ -86,8 +93,23 @@ class Authenticator implements AuthenticatorInterface {
      * Called when authentication is needed, but it's not sent
      */
     public function start(Request $request, AuthenticationException $authException = null) {
-        $errorDetails = "Please visit the '/auth' link to login with your Spotify account!";
-        return JsonResponse::create($errorDetails, JsonResponse::HTTP_UNAUTHORIZED);
+
+        $spotifySession = new \SpotifyWebAPI\Session(
+            $this->params->get('spotifyApi.clientID'),
+            $this->params->get('spotifyApi.clientSecret'),
+            $this->params->get('spotifyApi.redirectUri')
+        );
+
+        // user need to be authenticated
+        $options = [
+            'scope' => [
+                'user-read-email',
+                'playlist-read-private',
+                'playlist-modify-private'
+            ],
+        ];
+
+        return new RedirectResponse($spotifySession->getAuthorizeUrl($options));
     }
 
     public function supportsRememberMe() {

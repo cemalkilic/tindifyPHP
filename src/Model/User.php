@@ -10,7 +10,7 @@ class User implements UserInterface {
 
     private $username;
     private $accessToken;
-
+    private $displayName;
 
     /**
      * User constructor.
@@ -23,13 +23,6 @@ class User implements UserInterface {
     public function __toString() {
         return $this->getUsername();
     }
-
-    /**
-     * @return String
-     */
-    public function getAccessToken(): String {
-         return $this->accessToken;
-     }
 
     public function getRoles() {
         return [];
@@ -49,6 +42,22 @@ class User implements UserInterface {
 
     public function eraseCredentials() {
         // TODO: Implement eraseCredentials() method.
+    }
+
+    public function getAccessToken(): String {
+        return $this->accessToken;
+    }
+
+    public function setAccessToken(String $accessToken): void {
+        $this->accessToken = $accessToken;
+    }
+
+    public function getDisplayName() {
+        return $this->displayName;
+    }
+
+    public function setDisplayName($displayName): void {
+        $this->displayName = $displayName;
     }
 
 }

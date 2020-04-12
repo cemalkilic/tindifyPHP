@@ -1,14 +1,22 @@
 security:
   firewalls:
+    spotifyAuth:
+      pattern: ^/(auth|authCallback)
+      provider: spotifyUserProvider
+      guard:
+        authenticators:
+          - App\Security\SpotifyAuthenticator
     main:
       pattern: ^/
 #      anonymous: lazy
-      stateless: true
       logout: ~
+      provider: userProvider
       guard:
         authenticators:
           - App\Security\Authenticator
 
   providers:
-    spotifyUserProvider:
+    userProvider:
       id: App\Security\UserProvider
+    spotifyUserProvider:
+      id: App\Security\SpotifyUserProvider

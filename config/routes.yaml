@@ -4,10 +4,17 @@ index:
   path: /
   controller: App\Controller\IndexController::index
 
+## Spotify Auth Endpoints - START
+
 # just a place holder for now
 authCallback:
   methods: GET
   path: /authCallback
+auth:
+  methods: GET
+  path: /auth
+
+## Spotify Auth Endpoints - END
 
 playlists:
   path: /playlists
