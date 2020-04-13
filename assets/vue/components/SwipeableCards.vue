@@ -133,16 +133,26 @@
                 }
             },
             createAudio(path, autoplay = false, volume = 0.7) {
-                // TODO better way than unload?
-                Howler.unload()
+                const fadeTime = 1000 // milliseconds
+
+                // If there is a song already, fade it out
+                // TODO not sure about this check
+                if (this.audio && this.audio.fade) {
+                    this.audio.fade(volume, 0, fadeTime * 1.4);
+                }
+
                 this.audio = new Howl({
                     src: path,
                     format: ['mp3'],
                     html5: true,
-                    autoplay: autoplay,
                     loop: false,
-                    volume: volume
                 })
+
+                if (autoplay) {
+                    // start song with fade in
+                    this.audio.play()
+                    this.audio.fade(0, volume, fadeTime);
+                }
             },
             emitAndNext(event) {
                 this.$emit(event, this.index)
