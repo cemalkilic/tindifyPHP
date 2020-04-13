@@ -162,7 +162,7 @@
         transform: translateX(-50%);
         display: flex;
         padding-bottom: 30px;
-        justify-content: space-around;
+        justify-content: center;
         align-items: center;
     }
     .btn {

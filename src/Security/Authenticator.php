@@ -67,6 +67,9 @@ class Authenticator implements AuthenticatorInterface {
         // Check credentials - e.g. make sure the password is valid.
         // In case of an API token, no credential check is needed.
 
+        // No more control, for now!
+        $this->session->remove('spotify_user');
+
         // Return `true` to cause authentication success
         return true;
     }
