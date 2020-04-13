@@ -188,6 +188,10 @@
             &::before {
                 content: '';
             }
+            .svg-inline--fa {
+                height: 3em;
+                width: 3em;
+            }
         }
         &--like {
             background-color: red;
@@ -203,6 +207,8 @@
         }
         &--skip {
             color: green;
+            width: 100px;
+            height: 100px;
         }
     }
     .flex {
