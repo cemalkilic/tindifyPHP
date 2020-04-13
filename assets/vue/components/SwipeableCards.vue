@@ -54,10 +54,11 @@
         </div>
         <div class="footer fixed">
             <div class="btn btn--decline" @click="reject">
-                <i class="material-icons">close</i>
+                <i class="fas fa-times">close</i>
             </div>
-            <div class="btn btn--skip" @click="skip">
-                <i class="material-icons">call_missed</i>
+            <div class="btn btn--skip" @click="toggleAudio(current.previewURL)">
+                <i v-show="paused" class="fas fa-play-circle">play</i>
+                <i v-show="playing" class="fas fa-pause">pause</i>
             </div>
             <div class="btn btn--like" @click="match">
                 <i class="fas fa-heart">favorite</i>
@@ -67,6 +68,7 @@
 </template>
 <script>
     import axios from "axios";
+    import { Howl, Howler } from "howler";
     import { Vue2InteractDraggable, InteractEventBus } from 'vue2-interact'
     const EVENTS = {
         MATCH: 'match',
@@ -85,13 +87,19 @@
                     draggedLeft: EVENTS.REJECT,
                     draggedUp: EVENTS.SKIP
                 },
-                cards: []
+                cards: [],
+                audio: {},
+                paused: true
             }
         },
         mounted () {
             axios
                 .get('/playlist/6BZtUvgDkQhH6SIM3vWz7D/songs')
-                .then(response => (this.cards = response.data.content.items))
+                .then(response => {
+                    this.cards = response.data.content.items
+                    this.createAudio(this.current.previewURL)
+                    this.paused = true
+                })
         },
         computed: {
             current() {
@@ -99,6 +107,9 @@
             },
             next() {
                 return this.cards[this.index + 1]
+            },
+            playing() {
+                return !this.paused
             }
         },
         methods: {
@@ -111,12 +122,35 @@
             skip() {
                 InteractEventBus.$emit(EVENTS.SKIP)
             },
+            toggleAudio(path) {
+                if (this.playing) {
+                    // stop the current one
+                    this.audio.pause()
+                    this.paused = true
+                } else {
+                    this.paused = false
+                    this.audio.play()
+                }
+            },
+            createAudio(path, autoplay = false, volume = 0.7) {
+                // TODO better way than unload?
+                Howler.unload()
+                this.audio = new Howl({
+                    src: path,
+                    format: ['mp3'],
+                    html5: true,
+                    autoplay: autoplay,
+                    loop: false,
+                    volume: volume
+                })
+            },
             emitAndNext(event) {
                 this.$emit(event, this.index)
                 setTimeout(() => this.isVisible = false, 200)
                 setTimeout(() => {
                     this.index++
                     this.isVisible = true
+                    this.createAudio(this.current.previewURL, this.playing)
                 }, 200)
             }
         }
