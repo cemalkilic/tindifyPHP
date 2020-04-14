@@ -22,3 +22,6 @@ security:
       id: App\Security\UserProvider
     spotifyUserProvider:
       id: App\Security\SpotifyUserProvider
+
+  access_control:
+    - {path: '/.+', roles: IS_AUTHENTICATED_FULLY}
