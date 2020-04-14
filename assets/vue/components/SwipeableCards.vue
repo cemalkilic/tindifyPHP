@@ -67,7 +67,7 @@
     </section>
 </template>
 <script>
-    import axios from "axios";
+    import {getSongsInPlaylist} from "@/api/playlists.js";
     import { Howl, Howler } from "howler";
     import { Vue2InteractDraggable, InteractEventBus } from 'vue2-interact'
     const EVENTS = {
@@ -93,13 +93,9 @@
             }
         },
         mounted () {
-            axios
-                .get('/playlist/6BZtUvgDkQhH6SIM3vWz7D/songs')
-                .then(response => {
-                    this.cards = response.data.content.items
-                    this.createAudio(this.current.previewURL)
-                    this.paused = true
-                })
+            this.fetchSongs("3Ca0sM5o6FJnZZFfbudEeL");
+            this.createAudio(this.current.previewURL);
+            this.paused = true;
         },
         computed: {
             current() {
@@ -113,6 +109,11 @@
             }
         },
         methods: {
+            async fetchSongs(playlistID) {
+                // TODO error handling
+                const {data} = await getSongsInPlaylist(playlistID);
+                this.cards = data.content.items;
+            },
             match() {
                 InteractEventBus.$emit(EVENTS.MATCH)
             },
