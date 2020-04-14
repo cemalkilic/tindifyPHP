@@ -1,14 +1,16 @@
 <template>
     <div id="app">
+        <PlaylistList />
         <swipeable-cards />
     </div>
 </template>
 
 <script>
     import SwipeableCards from './components/SwipeableCards.vue'
+    import PlaylistList from "@/components/PlaylistList";
     export default {
         name: 'app',
-        components: { SwipeableCards }
+        components: {PlaylistList, SwipeableCards }
     }
 </script>
 

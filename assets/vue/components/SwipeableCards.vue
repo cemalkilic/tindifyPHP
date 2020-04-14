@@ -93,9 +93,10 @@
             }
         },
         mounted () {
-            this.fetchSongs("3Ca0sM5o6FJnZZFfbudEeL");
-            this.createAudio(this.current.previewURL);
-            this.paused = true;
+            var vm = this;
+            this.$root.$on('swipeable-cards-event-first', function (playlistID) {
+                vm.fetchSongs(playlistID)
+            });
         },
         computed: {
             current() {
@@ -113,6 +114,8 @@
                 // TODO error handling
                 const {data} = await getSongsInPlaylist(playlistID);
                 this.cards = data.content.items;
+                this.createAudio(this.current.previewURL);
+                this.paused = true;
             },
             match() {
                 InteractEventBus.$emit(EVENTS.MATCH)
