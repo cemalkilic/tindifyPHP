@@ -2,13 +2,14 @@
 
 namespace App\Security;
 
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\UserAccessKeys;
+use App\Service\UserTokenPersister;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -19,24 +20,37 @@ use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 class SpotifyAuthenticator implements AuthenticatorInterface {
 
     const TOKEN_NAME = "X-AUTH-TOKEN";
-    const TOKEN_VALUE_SECRET = "veryBasicSecurity";
 
     private $params;
-    private $em;
-    private $session;
+    private $userTokenPersister;
 
-    public function __construct(ContainerBagInterface $params, EntityManagerInterface $em, SessionInterface $session) {
+    public function __construct(ContainerBagInterface $params, UserTokenPersister $persister) {
         $this->params = $params;
-        $this->em = $em;
-        $this->session = $session;
+        $this->userTokenPersister = $persister;
     }
 
     public function createAuthenticatedToken(UserInterface $user, string $providerKey) {
-        return new PostAuthenticationGuardToken(
+
+        // create the access key for user and persist it
+        // TODO does this need to be done here?
+        $accessKey = hash('sha256', $user->getUsername() . time());
+
+        $userAccessKey = new UserAccessKeys();
+        $userAccessKey->setSpotifyUserID($user->getUsername());
+        $userAccessKey->setAccessKey($accessKey);
+        $userAccessKey->setExpireAt(new \DateTime("+7 days"));
+        $userAccessKey->setCreatedAt(new \DateTime());
+        $this->userTokenPersister->persistUserAccessKey($userAccessKey);
+
+        $token = new PostAuthenticationGuardToken(
             $user,
             $providerKey,
             $user->getRoles()
         );
+
+        // setting access key to use at onAuthenticationSuccess
+        $token->setAttribute('accessKey', $accessKey);
+        return $token;
     }
 
     /**
@@ -63,11 +77,8 @@ class SpotifyAuthenticator implements AuthenticatorInterface {
             return null;
         }
 
-        $user = $userProvider->loadUserByUsername($authorizationCode);
-        $this->session->set('spotify_user', $user);
-
         // if a User is returned, checkCredentials() is called
-        return $user;
+        return $userProvider->loadUserByUsername($authorizationCode);
     }
 
     public function checkCredentials($credentials, UserInterface $user) {
@@ -80,7 +91,12 @@ class SpotifyAuthenticator implements AuthenticatorInterface {
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey) {
         // user is authenticated, return it to homepage
-        return new RedirectResponse("/");
+        $authKey = $token->getAttribute("accessKey");
+
+        $response = new RedirectResponse("/", 302);
+        $response->headers->setCookie(Cookie::create(self::TOKEN_NAME, $authKey));
+
+        return $response;
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception) {

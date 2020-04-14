@@ -4,7 +4,7 @@ namespace App\Security;
 
 use App\Entity\UserSpotifyTokens;
 use App\Model\User;
-use App\Service\SpotifyTokenPersister;
+use App\Service\UserTokenPersister;
 use SpotifyWebAPI\SpotifyWebAPI;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -15,14 +15,14 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 class SpotifyUserProvider implements UserProviderInterface {
 
     private $params;
-    private $spotifyTokenPersister;
+    private $userTokenPersister;
 
     /**
      * UserProvider constructor.
      */
-    public function __construct(ContainerBagInterface $params, SpotifyTokenPersister $spotifyTokenPersister) {
+    public function __construct(ContainerBagInterface $params, UserTokenPersister $userTokenPersister) {
         $this->params = $params;
-        $this->spotifyTokenPersister = $spotifyTokenPersister;
+        $this->userTokenPersister = $userTokenPersister;
     }
 
     /**
@@ -64,7 +64,7 @@ class SpotifyUserProvider implements UserProviderInterface {
         $spotifyTokens->setCreatedAt(new \DateTime());
         $spotifyTokens->setSpotifyUserID($userDetails->id);
 
-        $this->spotifyTokenPersister->persistSpotifyTokens($spotifyTokens);
+        $this->userTokenPersister->persistSpotifyTokens($spotifyTokens);
 
         $authedUser = new User($userDetails->id, $accessToken);
         $authedUser->setDisplayName($userDetails->display_name);

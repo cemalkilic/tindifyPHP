@@ -6,7 +6,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -20,12 +19,9 @@ class Authenticator implements AuthenticatorInterface {
     const TOKEN_NAME = "X-AUTH-TOKEN";
 
     private $params;
-    private $session;
 
-    public function __construct(ContainerBagInterface $params,
-                                SessionInterface $session) {
+    public function __construct(ContainerBagInterface $params) {
         $this->params = $params;
-        $this->session = $session;
     }
 
     public function createAuthenticatedToken(UserInterface $user, string $providerKey) {
@@ -42,7 +38,7 @@ class Authenticator implements AuthenticatorInterface {
      * to be skipped.
      */
     public function supports(Request $request) {
-        return $request->headers->has(self::TOKEN_NAME) || $this->session->has('spotify_user');
+        return $request->headers->has(self::TOKEN_NAME) || $request->cookies->has(self::TOKEN_NAME);
     }
 
     /**
@@ -50,7 +46,7 @@ class Authenticator implements AuthenticatorInterface {
      * be passed to getUser() as $credentials.
      */
     public function getCredentials(Request $request) {
-        return $request->headers->get(self::TOKEN_NAME) ?? $this->session->get('spotify_user');
+        return $request->headers->get(self::TOKEN_NAME) ?? $request->cookies->get(self::TOKEN_NAME);
     }
 
     public function getUser($credentials, UserProviderInterface $userProvider) {
@@ -66,9 +62,6 @@ class Authenticator implements AuthenticatorInterface {
     public function checkCredentials($credentials, UserInterface $user) {
         // Check credentials - e.g. make sure the password is valid.
         // In case of an API token, no credential check is needed.
-
-        // No more control, for now!
-        $this->session->remove('spotify_user');
 
         // Return `true` to cause authentication success
         return true;

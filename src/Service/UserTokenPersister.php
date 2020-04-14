@@ -3,10 +3,11 @@
 
 namespace App\Service;
 
+use App\Entity\UserAccessKeys;
 use App\Entity\UserSpotifyTokens;
 use Doctrine\ORM\EntityManagerInterface;
 
-class SpotifyTokenPersister {
+class UserTokenPersister {
 
     private $em;
 
@@ -40,6 +41,11 @@ class SpotifyTokenPersister {
             $existingSpotifyTokens->setCreatedAt($createdAt);
         }
 
+        $this->em->flush();
+    }
+
+    public function persistUserAccessKey(UserAccessKeys $userAccessKeys) {
+        $this->em->persist($userAccessKeys);
         $this->em->flush();
     }
 }

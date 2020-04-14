@@ -3,13 +3,15 @@ security:
     spotifyAuth:
       pattern: ^/(auth|authCallback)
       provider: spotifyUserProvider
+      stateless: true
       guard:
         authenticators:
           - App\Security\SpotifyAuthenticator
     main:
       pattern: ^/
-#      anonymous: lazy
+      anonymous: lazy
       logout: ~
+      stateless: true
       provider: userProvider
       guard:
         authenticators:

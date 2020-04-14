@@ -2,9 +2,10 @@
 
 namespace App\Security;
 
+use App\Entity\UserAccessKeys;
 use App\Entity\UserSpotifyTokens;
 use App\Model\User;
-use App\Service\SpotifyTokenPersister;
+use App\Service\UserTokenPersister;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
@@ -38,35 +39,25 @@ class UserProvider implements UserProviderInterface {
      *
      * @throws UsernameNotFoundException if the user is not found
      */
-    public function loadUserByUsername($credentials) {
-        if (empty($credentials)) {
+    public function loadUserByUsername($accessKey) {
+        if (empty($accessKey)) {
             return null;
         }
 
-        // if credentials is instance of \App\Model\User
-        // it means user came from spotify auth, make sure it also exists in DB
-        if ($credentials instanceof \App\Model\User) {
-            $userID = $credentials->getUsername();
-            // check if user exist in DB
-            $existingUser = $this->em->getRepository(\App\Entity\User::class)->find($userID);
-            if (!$existingUser) {
-                // insert the new user
-                $user = new \App\Entity\User($userID);
-                $user->setDisplayName($credentials->getDisplayName());
-                $this->em->persist($user);
-                $this->em->flush();
-            }
-        } else {
-            // TODO
-            // handle token case here!
+        // check if user exist with the given token
+        $existingUserAccessKeys = $this->em->getRepository(UserAccessKeys::class)->find($accessKey);
+        if (!isset($existingUserAccessKeys)) {
+            throw new UsernameNotFoundException("No user found with the given token!");
         }
 
-        // Load a User object from your data source or throw UsernameNotFoundException.
-        // The $username argument may not actually be a username:
-        // it is whatever value is being returned by the getUsername()
-        // method in your User class.
+        // need to get the spotify access token for the user
+        $userID = $existingUserAccessKeys->getSpotifyUserID();
+        $userSpotifyTokens = $this->em->getRepository(UserSpotifyTokens::class)->find($userID);
+        if (!isset($userSpotifyTokens)) {
+            throw new UsernameNotFoundException("No spotify token found for the user!");
+        }
 
-        return $credentials;
+        return new User($userID, $userSpotifyTokens->getAccessToken());
     }
 
     /**
@@ -112,6 +103,7 @@ class UserProvider implements UserProviderInterface {
 
             $isRefreshed = $spotifySession->refreshAccessToken($spotifyTokens->getRefreshToken());
             if (!$isRefreshed) {
+                // TODO no need to throw exception but fine for now
                 throw new UsernameNotFoundException("Can not refresh the tokens!");
             }
 
@@ -122,8 +114,8 @@ class UserProvider implements UserProviderInterface {
             $spotifyTokens->setRefreshToken($spotifySession->getRefreshToken());
             $spotifyTokens->setCreatedAt(new \DateTime());
 
-            $spotifyTokenPersister = new SpotifyTokenPersister($this->em);
-            $spotifyTokenPersister->persistSpotifyTokens($spotifyTokens);
+            $userTokenPersister = new UserTokenPersister($this->em);
+            $userTokenPersister->persistSpotifyTokens($spotifyTokens);
 
             $user->setAccessToken($spotifySession->getAccessToken());
         }
