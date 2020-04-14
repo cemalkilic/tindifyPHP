@@ -76,4 +76,12 @@ Encore
     //.addEntry('admin', './assets/js/admin.js')
 ;
 
-module.exports = Encore.getWebpackConfig();
+const fullConfig = Encore.getWebpackConfig();
+const path = require('path');
+fullConfig.resolve = {
+    extensions: ['.js', '.vue', '.json'],
+    alias: {
+        '@': path.resolve('assets/vue'),
+    }
+};
+module.exports = fullConfig;
