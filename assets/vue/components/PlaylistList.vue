@@ -6,13 +6,14 @@
                 @click="getSongsForPlaylist(playlist.id)"
                 button
         >
+            <b-img fluid thumbnail left :src="playlist.images[0].url" :alt="playlist.name" width="160"></b-img>
                 {{ playlist.name }} - {{ playlist.tracks.total }} songs
         </b-list-group-item>
     </b-list-group>
 </template>
 
 <script>
-    import { BListGroup, BListGroupItem } from 'bootstrap-vue';
+    import { BImg, BListGroup, BListGroupItem } from 'bootstrap-vue';
     import 'bootstrap/dist/css/bootstrap.css'
     import 'bootstrap-vue/dist/bootstrap-vue.css'
 
@@ -22,7 +23,8 @@
         name: "PlaylistList",
         components: {
             'b-list-group': BListGroup,
-            'b-list-group-item': BListGroupItem
+            'b-list-group-item': BListGroupItem,
+            'b-img' : BImg
         },
         mounted() {
             this.fetchPlaylists();
