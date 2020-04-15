@@ -1,7 +1,10 @@
 <template>
     <div id="app">
         <PlaylistList />
-        <swipeable-cards />
+        <swipeable-cards
+                v-if="this.$store.getters.songsLoaded"
+                :key="this.$store.getters.currentPlaylistID"
+        />
     </div>
 </template>
 

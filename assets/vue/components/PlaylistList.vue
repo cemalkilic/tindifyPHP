@@ -1,7 +1,11 @@
 <template>
     <b-list-group>
-        <b-list-group-item v-for="playlist in playlists" :key="playlist.id">
-            <button @click="getSongsForPlaylist(playlist.id)"> click me</button>
+        <b-list-group-item
+                v-for="playlist in playlists"
+                :key="playlist.id"
+                @click="getSongsForPlaylist(playlist.id)"
+                button
+        >
                 {{ playlist.name }} - {{ playlist.tracks.total }} songs
         </b-list-group-item>
     </b-list-group>
@@ -12,7 +16,7 @@
     import 'bootstrap/dist/css/bootstrap.css'
     import 'bootstrap-vue/dist/bootstrap-vue.css'
 
-    import { getAllPlaylists} from "@/api/playlists";
+    import { getAllPlaylists, getSongsInPlaylist } from "@/api/playlists";
 
     export default {
         name: "PlaylistList",
@@ -20,21 +24,26 @@
             'b-list-group': BListGroup,
             'b-list-group-item': BListGroupItem
         },
-        data() {
-            return {
-                playlists: []
-            }
-        },
         mounted() {
             this.fetchPlaylists();
+        },
+        computed: {
+            playlists() {
+              return this.$store.getters.playlists;
+            }
         },
         methods: {
             async fetchPlaylists() {
                 const {data} = await getAllPlaylists();
-                this.playlists = data.content.items;
+                await this.$store.dispatch('setPlaylists', data.content.items)
             },
-            getSongsForPlaylist(playlistID) {
-                this.$root.$emit('swipeable-cards-event-first', playlistID)
+            async getSongsForPlaylist(playlistID) {
+                const {data} = await getSongsInPlaylist(playlistID);
+                await this.$store.dispatch('setSongsForPlaylist',
+                    {
+                        playlistID,
+                        'songs': data.content.items
+                });
             }
         }
     }

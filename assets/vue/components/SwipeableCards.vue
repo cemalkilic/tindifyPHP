@@ -56,7 +56,7 @@
             <div class="btn btn--decline" @click="reject">
                 <i class="fas fa-times">close</i>
             </div>
-            <div class="btn btn--skip" @click="toggleAudio(current.previewURL)">
+            <div class="btn btn--skip" @click="toggleAudio()">
                 <i v-show="paused" class="fas fa-play-circle">play</i>
                 <i v-show="playing" class="fas fa-pause">pause</i>
             </div>
@@ -67,8 +67,7 @@
     </section>
 </template>
 <script>
-    import {getSongsInPlaylist} from "@/api/playlists.js";
-    import { Howl, Howler } from "howler";
+    import { Howl } from "howler";
     import { Vue2InteractDraggable, InteractEventBus } from 'vue2-interact'
     const EVENTS = {
         MATCH: 'match',
@@ -87,16 +86,13 @@
                     draggedLeft: EVENTS.REJECT,
                     draggedUp: EVENTS.SKIP
                 },
-                cards: [],
                 audio: {},
                 paused: true
             }
         },
         mounted () {
-            var vm = this;
-            this.$root.$on('swipeable-cards-event-first', function (playlistID) {
-                vm.fetchSongs(playlistID)
-            });
+            this.paused = true;
+            this.createAudio(this.current.previewURL)
         },
         computed: {
             current() {
@@ -107,16 +103,12 @@
             },
             playing() {
                 return !this.paused
-            }
+            },
+            cards() {
+                return this.$store.getters.songs;
+            },
         },
         methods: {
-            async fetchSongs(playlistID) {
-                // TODO error handling
-                const {data} = await getSongsInPlaylist(playlistID);
-                this.cards = data.content.items;
-                this.createAudio(this.current.previewURL);
-                this.paused = true;
-            },
             match() {
                 InteractEventBus.$emit(EVENTS.MATCH)
             },
@@ -126,7 +118,7 @@
             skip() {
                 InteractEventBus.$emit(EVENTS.SKIP)
             },
-            toggleAudio(path) {
+            toggleAudio() {
                 if (this.playing) {
                     // stop the current one
                     this.audio.pause()
