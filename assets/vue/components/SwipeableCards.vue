@@ -54,14 +54,14 @@
         </div>
         <div class="footer fixed">
             <div class="btn btn--decline" @click="reject">
-                <i class="fas fa-times">close</i>
+                <BIconXCircle width="100%" height="100%"/>
             </div>
             <div class="btn btn--skip" @click="toggleAudio()">
-                <i v-show="paused" class="fas fa-play-circle">play</i>
-                <i v-show="playing" class="fas fa-pause">pause</i>
+                <BIconPlayFill v-show="paused" width="100%" height="100%"/>
+                <BIconPauseFill v-show="playing" width="100%" height="100%"/>
             </div>
             <div class="btn btn--like" @click="match">
-                <i class="fas fa-heart">favorite</i>
+                <BIconHeart width="100%" height="100%"/>
             </div>
         </div>
     </section>
@@ -69,6 +69,13 @@
 <script>
     import { Howl } from "howler";
     import { Vue2InteractDraggable, InteractEventBus } from 'vue2-interact'
+    import {
+        BIconPlayFill,
+        BIconPauseFill,
+        BIconXCircle,
+        BIconHeart
+    } from 'bootstrap-vue';
+
     const EVENTS = {
         MATCH: 'match',
         SKIP: 'skip',
@@ -76,7 +83,7 @@
     }
     export default {
         name: 'SwipeableCards',
-        components: { Vue2InteractDraggable },
+        components: { Vue2InteractDraggable, BIconPlayFill, BIconPauseFill, BIconXCircle, BIconHeart},
         data() {
             return {
                 isVisible: true,
