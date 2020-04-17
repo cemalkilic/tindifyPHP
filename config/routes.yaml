@@ -17,32 +17,33 @@ auth:
 ## Spotify Auth Endpoints - END
 
 playlists:
-  path: /playlists
+  path:       /playlists
   controller: App\Controller\PlaylistController::getUserPlaylists
+  methods:    GET
 
 playlist-create:
-  path:       /playlist
+  path:       /playlists
   controller: App\Controller\PlaylistController::createTindifyPlaylist
   methods:    POST
 
 add-song-to-playlist:
-  path:       /playlist/{id}/songs
+  path:       /playlists/{id}/songs
   controller: App\Controller\PlaylistController::addSongsToPlaylist
   methods:    POST
 
 get-playlist-songs:
-  path:       /playlist/{id}/songs
+  path:       /playlists/{id}/songs
   controller: App\Controller\PlaylistController::getPlaylistSongs
   methods:    GET
 
 
 ## Song related
 get-recommended-songs:
-  path:       /song/recommendations
+  path:       /songs/recommendations
   controller: App\Controller\SongController::getRecommendations
   methods:    POST
 
 get-a-song:
-  path:       /song/{id}
+  path:       /songs/{id}
   controller: App\Controller\SongController::getSong
   methods:    GET
