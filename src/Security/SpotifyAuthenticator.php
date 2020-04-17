@@ -33,7 +33,7 @@ class SpotifyAuthenticator implements AuthenticatorInterface {
 
         // create the access key for user and persist it
         // TODO does this need to be done here?
-        $accessKey = hash('sha256', $user->getUsername() . time());
+        $accessKey = substr(hash('sha256', $user->getUsername() . time()), 0, 32);
 
         $userAccessKey = new UserAccessKeys();
         $userAccessKey->setSpotifyUserID($user->getUsername());
