@@ -2,8 +2,8 @@
     <div id="app">
         <PlaylistList />
         <swipeable-cards
-                v-if="this.$store.getters.songsLoaded"
-                :key="this.$store.getters.currentPlaylistID"
+                v-if="this.$store.getters['songs/songsLoaded']"
+                :key="this.$store.getters['playlists/currentPlaylistID']"
         />
     </div>
 </template>

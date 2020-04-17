@@ -112,7 +112,7 @@
                 return !this.paused
             },
             cards() {
-                return this.$store.getters.songs;
+                return this.$store.getters['songs/songs'];
             },
         },
         methods: {

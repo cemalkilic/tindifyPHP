@@ -17,8 +17,6 @@
     import 'bootstrap/dist/css/bootstrap.css'
     import 'bootstrap-vue/dist/bootstrap-vue.css'
 
-    import { getAllPlaylists, getSongsInPlaylist } from "@/api/playlists";
-
     export default {
         name: "PlaylistList",
         components: {
@@ -31,21 +29,15 @@
         },
         computed: {
             playlists() {
-              return this.$store.getters.playlists;
+              return this.$store.getters['playlists/playlists'];
             }
         },
         methods: {
             async fetchPlaylists() {
-                const {data} = await getAllPlaylists();
-                await this.$store.dispatch('setPlaylists', data.content.items)
+                await this.$store.dispatch('playlists/fetchPlaylists')
             },
             async getSongsForPlaylist(playlistID) {
-                const {data} = await getSongsInPlaylist(playlistID);
-                await this.$store.dispatch('setSongsForPlaylist',
-                    {
-                        playlistID,
-                        'songs': data.content.items
-                });
+                await this.$store.dispatch('playlists/fetchSongsForPlaylist', playlistID);
             }
         }
     }
