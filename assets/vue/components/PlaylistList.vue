@@ -3,7 +3,7 @@
         <b-list-group-item
                 v-for="playlist in playlists"
                 :key="playlist.id"
-                @click="getSongsForPlaylist(playlist.id)"
+                @click="goCards(playlist.id)"
                 button
         >
             <b-img fluid thumbnail left :src="playlist.images[0].url" :alt="playlist.name" width="160"></b-img>
@@ -36,8 +36,8 @@
             async fetchPlaylists() {
                 await this.$store.dispatch('playlists/fetchPlaylists')
             },
-            async getSongsForPlaylist(playlistID) {
-                await this.$store.dispatch('playlists/fetchSongsForPlaylist', playlistID);
+            goCards(playlistID) {
+                this.$router.push({ name: 'cards', params: { playlistID: playlistID }})
             }
         }
     }

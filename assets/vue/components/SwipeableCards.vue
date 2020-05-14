@@ -97,9 +97,8 @@
                 paused: true
             }
         },
-        mounted () {
-            this.paused = true;
-            this.createAudio(this.current.previewURL)
+        created () {
+            this.fetchSongs()
         },
         computed: {
             current() {
@@ -115,7 +114,19 @@
                 return this.$store.getters['songs/songs'];
             },
         },
+        watch: {
+            // call again the method if the route changes
+            '$route': 'fetchSongs'
+        },
         methods: {
+            async fetchSongs () {
+                const playlistID = this.$route.params.playlistID;
+                if (playlistID) {
+                    await this.$store.dispatch('playlists/fetchSongsForPlaylist', playlistID)
+                    this.paused = true
+                    this.createAudio(this.current.previewURL)
+                }
+            },
             match() {
                 InteractEventBus.$emit(EVENTS.MATCH)
             },
