@@ -61,6 +61,12 @@ Encore
 
     .enableVueLoader()
 
+    .copyFiles({
+        from: './assets/images',
+        to: 'images/[path][name].[ext]',
+        pattern: /\.(png|jpg|jpeg)$/
+    })
+
     // uncomment if you use TypeScript
     //.enableTypeScriptLoader()
 
