@@ -1,19 +1,16 @@
 <template>
     <div id="app">
-        <PlaylistList />
-        <swipeable-cards
-                v-if="this.$store.getters['songs/songsLoaded']"
-                :key="this.$store.getters['playlists/currentPlaylistID']"
-        />
+        <Navigation></Navigation>
+        <router-view/>
     </div>
 </template>
 
 <script>
-    import SwipeableCards from './components/SwipeableCards.vue'
-    import PlaylistList from "@/components/PlaylistList";
+
+    import Navigation from '@/components/Navigation'
     export default {
         name: 'app',
-        components: {PlaylistList, SwipeableCards }
+        components: { Navigation }
     }
 </script>
 
