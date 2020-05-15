@@ -57,9 +57,15 @@ class SongController extends BaseController {
         }
     }
 
-    public function getSavedSongs() {
+    public function getSavedSongs(Request $request) {
+
+        $limit      = $request->query->get("limit", null);
+        $offset     = $request->query->get("offset", null);
+
+        $options = compact("limit", "offset");
+
         try {
-            $songs = $this->api->getSavedSongs();
+            $songs = $this->api->getSavedSongs($options);
 
             $songs['items'] = array_map(function($item) {
                 $song = new Song($item);

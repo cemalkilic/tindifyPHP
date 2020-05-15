@@ -36,7 +36,7 @@ class SpotifyAPIWrapper {
         // Filter for needed fields
         $defaultOptions['fields'] = $this->apiRequestFilter->getTrackFilters();
 
-        $options = array_merge($defaultOptions, $options);
+        $options = $this->mergeOptionsArray($defaultOptions, $options);
 
         $songs = $this->api->getPlaylistTracks($playlistID, $options);
 
@@ -58,7 +58,7 @@ class SpotifyAPIWrapper {
             $defaultOptions["limit"]--;
         }
 
-        $options = array_merge($defaultOptions, $options);
+        $options = $this->mergeOptionsArray($defaultOptions, $options);
 
         $playlists = $this->api->getMyPlaylists($options);
 
@@ -99,7 +99,7 @@ class SpotifyAPIWrapper {
         // at the day of implementation
         // $options['fields'] = $this->apiRequestFilter->getTrackFilters();
 
-        $options = array_merge($defaultOptions, $options);
+        $options = $this->mergeOptionsArray($defaultOptions, $options);
 
         $songs = $this->api->getRecommendations($options);
 
@@ -116,7 +116,7 @@ class SpotifyAPIWrapper {
         // Filter for needed fields
         $defaultOptions['fields'] = $this->apiRequestFilter->getTrackFilters();
 
-        $options = array_merge($defaultOptions, $options);
+        $options = $this->mergeOptionsArray($defaultOptions, $options);
 
         $songs = $this->api->getMySavedTracks($options);
         $songs['items'] = array_map(function ($item) {
@@ -140,6 +140,24 @@ class SpotifyAPIWrapper {
             "limit"  => self::DEFAULT_LIMIT,
             "offset" => self::DEFAULT_OFFSET
         ];
+    }
+
+    private function mergeOptionsArray($defaultOptions, $options) {
+        $options = array_filter($options, function($value, $key) {
+
+            if ($key == "limit") {
+                return is_numeric($value) && intval($value) >= 0;
+            }
+
+            if ($key == "offset") {
+                return is_numeric($value) && intval($value) >= 0;
+            }
+
+            return isset($value);
+
+        }, ARRAY_FILTER_USE_BOTH);
+
+        return array_merge($defaultOptions, $options);
     }
 
 }

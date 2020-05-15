@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 class PlaylistController extends BaseController {
 
     public function getUserPlaylists(Request $request) {
-        $limit  = $request->query->get("limit", 5);
-        $offset = $request->query->get("offset", 0);
+        $limit  = $request->query->get("limit", null);
+        $offset = $request->query->get("offset", null);
         try {
             $content = $this->api->getMyPlaylists(["limit" => $limit, "offset" => $offset]);
             return JsonResponse::create($content);
@@ -66,8 +66,8 @@ class PlaylistController extends BaseController {
     public function getPlaylistSongs(Request $request) {
 
         $playlistID = $request->attributes->get('id', null);
-        $limit      = $request->request->get('limit', 20);
-        $offset     = $request->request->get('offset', 0);
+        $limit      = $request->query->get("limit", null);
+        $offset     = $request->query->get("offset", null);
 
         $options = compact('limit', 'offset');
 
