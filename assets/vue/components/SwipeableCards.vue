@@ -75,6 +75,7 @@
         BIconXCircle,
         BIconHeart
     } from 'bootstrap-vue';
+    import store from "@/store/store";
 
     const EVENTS = {
         MATCH: 'match',
@@ -97,8 +98,19 @@
                 paused: true
             }
         },
-        created () {
-            this.fetchSongs()
+        beforeDestroy() {
+            this.audio.stop()
+        },
+        beforeRouteEnter(to, from, next) {
+            const playlistID = to.params.playlistID;
+            if (playlistID) {
+                store.dispatch('playlists/fetchSongsForPlaylist', playlistID).then(() => {
+                    next(vm => vm.initAudio());
+                });
+            } else {
+                // no playlist provided, redirect to playlist selection
+                next("/playlists")
+            }
         },
         computed: {
             current() {
@@ -114,18 +126,10 @@
                 return this.$store.getters['songs/songs'];
             },
         },
-        watch: {
-            // call again the method if the route changes
-            '$route': 'fetchSongs'
-        },
         methods: {
-            async fetchSongs () {
-                const playlistID = this.$route.params.playlistID;
-                if (playlistID) {
-                    await this.$store.dispatch('playlists/fetchSongsForPlaylist', playlistID)
-                    this.paused = true
-                    this.createAudio(this.current.previewURL)
-                }
+            initAudio() {
+                this.paused = true
+                this.createAudio(this.current.previewURL)
             },
             match() {
                 InteractEventBus.$emit(EVENTS.MATCH)
