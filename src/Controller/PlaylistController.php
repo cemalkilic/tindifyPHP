@@ -5,6 +5,7 @@ namespace App\Controller;
 
 
 use App\Model\Song;
+use App\Service\SpotifyAPIRequestFilter;
 use SpotifyWebAPI\SpotifyWebAPI;
 use SpotifyWebAPI\SpotifyWebAPIException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -16,10 +17,15 @@ class PlaylistController extends AbstractController {
 
     protected $container;
     private $api;
+    private $apiRequestFilter;
 
-    public function __construct(ContainerInterface $container, SpotifyWebAPI $api) {
+    public function __construct(ContainerInterface $container,
+                                SpotifyWebAPI $api,
+                                SpotifyAPIRequestFilter $spotifyAPIRequestFilter
+    ) {
         $this->container = $container;
         $this->api = $api;
+        $this->apiRequestFilter = $spotifyAPIRequestFilter;
         $this->setupAPI();
     }
 
@@ -88,13 +94,8 @@ class PlaylistController extends AbstractController {
 
         $options = compact('limit', 'offset');
 
-        // TODO make the field filtering more generic!
-        $options['fields'] = [
-            "limit,offset,total", // for succeeding requests
-            "items.track(id,is_local,name,popularity,preview_url,uri)", // song related
-            "items.track.album(id,images,name,uri)", // album related
-            "items.track.artists(id,name,uri)" // artist related
-        ];
+        // Filter for needed fields
+        $options['fields'] = $this->apiRequestFilter->getTrackFilters();
 
         try {
             $songs = $this->api->getPlaylistTracks($playlistID, $options);
