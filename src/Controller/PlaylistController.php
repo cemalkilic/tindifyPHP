@@ -28,10 +28,11 @@ class PlaylistController extends AbstractController {
         $this->api->setAccessToken($accessToken);
     }
 
-    public function getUserPlaylists() {
-
+    public function getUserPlaylists(Request $request) {
+        $limit  = $request->query->get("limit", 5);
+        $offset = $request->query->get("offset", 0);
         try {
-            $content = $this->api->getMyPlaylists(["limit" => 5]);
+            $content = $this->api->getMyPlaylists(["limit" => $limit, "offset" => $offset]);
             return JsonResponse::create($content);
         } catch (SpotifyWebAPIException $e) {
             $errorDetails = $e->getReason() ?? $e->getMessage();
