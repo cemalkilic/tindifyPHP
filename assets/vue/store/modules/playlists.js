@@ -8,24 +8,33 @@ export const state = {
 };
 export const mutations = {
     SET_PLAYLISTS(state, playlists) {
-        state.playlists = playlists;
+        // Append elem if it does not already exist in the store
+        playlists.forEach((item) => {
+            if (state.playlists.indexOf(item) === -1) {
+                state.playlists.push(item);
+            }
+        });
     },
     SET_SELECTED_PLAYLIST(state, playlistID) {
         state.selectedPlaylist = playlistID;
     }
 };
 export const actions = {
-    fetchPlaylists({ commit }) {
-        return getAllPlaylists()
+    fetchPlaylists({ commit }, payload ) {
+        return getAllPlaylists(payload)
             .then((resp) => {
-                commit('SET_PLAYLISTS', resp.data.content.items);
+                if (resp.data.content && resp.data.content.items) {
+                    commit('SET_PLAYLISTS', resp.data.content.items);
+                }
             })
     },
     fetchSongsForPlaylist({ commit, dispatch }, playlistID) {
         return getSongsInPlaylist(playlistID)
             .then((resp) => {
-                commit('SET_SELECTED_PLAYLIST', playlistID);
-                dispatch('songs/setSongs', resp.data.content.items, { root: true});
+                if (resp.data.content && resp.data.content.items) {
+                    commit('SET_SELECTED_PLAYLIST', playlistID);
+                    dispatch('songs/setSongs', resp.data.content.items, {root: true});
+                }
             })
     }
 };

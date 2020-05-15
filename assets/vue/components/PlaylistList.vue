@@ -17,6 +17,8 @@
     import 'bootstrap/dist/css/bootstrap.css'
     import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+    import store from '../store/store';
+
     export default {
         name: "PlaylistList",
         components: {
@@ -24,8 +26,25 @@
             'b-list-group-item': BListGroupItem,
             'b-img' : BImg
         },
+        data() {
+            return {
+                offset: 0,
+                limit: 5
+            }
+        },
+        beforeRouteEnter(to, from, next) {
+            if (store.getters['playlists/playlists'].length > 0) {
+                // we have already some playlists, continue to route
+                next();
+            } else {
+                // get playlists for the user initially
+                store.dispatch('playlists/fetchPlaylists', {}).then(() => {
+                    next();
+                });
+            }
+        },
         mounted() {
-            this.fetchPlaylists();
+            this.handleScroll();
         },
         computed: {
             playlists() {
@@ -33,12 +52,19 @@
             }
         },
         methods: {
-            async fetchPlaylists() {
-                await this.$store.dispatch('playlists/fetchPlaylists')
-            },
             goCards(playlistID) {
                 this.$router.push({ name: 'cards', params: { playlistID: playlistID }})
-            }
+            },
+            handleScroll () {
+                window.onscroll = async () => {
+                    let bottomOfWindow = document.documentElement.scrollTop + window.innerHeight === document.documentElement.offsetHeight;
+
+                    if (bottomOfWindow) {
+                        this.offset += 5;
+                        await this.$store.dispatch('playlists/fetchPlaylists', {limit: this.limit, offset: this.offset})
+                    }
+                };
+            },
         }
     }
 </script>

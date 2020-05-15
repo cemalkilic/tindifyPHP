@@ -4,7 +4,12 @@ const ENDPOINT = '/playlists';
 
 // All endpoints related to playlists
 
-const getAllPlaylists = () => httpClient.get(ENDPOINT);
+const getAllPlaylists = ({limit, offset}) => {
+    limit = limit || 5;
+    offset = offset || 0;
+
+    return httpClient.get(ENDPOINT + "?limit=" + limit + "&offset=" + offset);
+};
 const getSongsInPlaylist = (playlistID) => httpClient.get(ENDPOINT + "/" + playlistID + "/songs");
 
 export {

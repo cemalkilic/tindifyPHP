@@ -17,7 +17,7 @@
             return {
                 links: [
                     {
-                        id: 1,
+                        id: 0,
                         text: 'Home',
                         page:'/'
                     },
