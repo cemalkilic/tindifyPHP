@@ -13,12 +13,15 @@ class SpotifyAPIWrapper {
 
     private $api;
     private $apiRequestFilter;
+    private $apiResponseFilter;
 
     public function __construct(SpotifyWebAPI $spotifyWebAPI,
-                                SpotifyAPIRequestFilter $spotifyAPIRequestFilter
+                                SpotifyAPIRequestFilter $spotifyAPIRequestFilter,
+                                SpotifyAPIResponseFilter $spotifyAPIResponseFilter
     ) {
         $this->api = $spotifyWebAPI;
         $this->apiRequestFilter = $spotifyAPIRequestFilter;
+        $this->apiResponseFilter = $spotifyAPIResponseFilter;
         $this->setDefaultAPIOptions();
     }
 
@@ -35,7 +38,14 @@ class SpotifyAPIWrapper {
 
         $options = array_merge($defaultOptions, $options);
 
-        return $this->api->getPlaylistTracks($playlistID, $options);
+        $songs = $this->api->getPlaylistTracks($playlistID, $options);
+
+        $songs['items'] = array_map(function ($item) {
+            $item['track'] = $this->apiResponseFilter->getSongFields($item["track"]);
+            return $item;
+        }, $songs['items']);
+
+        return $songs;
     }
 
     public function getMyPlaylists($options = []) {
@@ -56,7 +66,11 @@ class SpotifyAPIWrapper {
     }
 
     public function getTrack($trackID) {
-        return $this->api->getTrack($trackID);
+        $song = $this->api->getTrack($trackID);
+
+        $song = $this->apiResponseFilter->getSongFields($song);
+
+        return $song;
     }
 
     public function getRecommendations($options) {
@@ -68,7 +82,13 @@ class SpotifyAPIWrapper {
 
         $options = array_merge($defaultOptions, $options);
 
-        return $this->api->getRecommendations($options);
+        $songs = $this->api->getRecommendations($options);
+
+        $songs['tracks'] = array_map(function ($item) {
+            return $this->apiResponseFilter->getSongFields($item);
+        }, $songs['tracks']);
+
+        return $songs;
     }
 
     private function setDefaultAPIOptions($options = []) {

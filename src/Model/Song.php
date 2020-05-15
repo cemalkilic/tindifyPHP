@@ -11,6 +11,16 @@ class Song {
     private $albumImage;
     private $isLocal;
 
+    public function __construct($constructArray) {
+        $this->id         = $constructArray["id"] ?? "";
+        $this->songName   = $constructArray["songName"] ?? "";
+        $this->previewURL = $constructArray["previewURL"] ?? "";
+        $this->artistName = $constructArray["artistName"] ?? "";
+        $this->albumName  = $constructArray["albumName"] ?? "";
+        $this->albumImage = $constructArray["albumImage"] ?? "";
+        $this->isLocal    = $constructArray["isLocal"];
+    }
+
     public function getId() {
         return $this->id;
     }
@@ -69,26 +79,6 @@ class Song {
 
     public function serializeToArray() {
         return get_object_vars($this);
-    }
-
-    // TODO must be a better way!
-    public static function createFromTrackDetails($track) {
-        $song = new Song();
-        $song->setID($track->id);
-        $song->setSongName($track->name);
-        $song->setPreviewURL($track->preview_url ?? '');
-
-        $artistName = implode(", ", array_map(function($artist) {
-            return $artist->name;
-        }, $track->artists));
-        $song->setArtistName($artistName);
-
-        $song->setAlbumName($track->album->name);
-        $song->setAlbumImage($track->album->images[0]->url);
-
-        $song->setIsLocal($track->is_local);
-
-        return $song;
     }
 
 }

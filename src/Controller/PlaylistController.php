@@ -74,10 +74,10 @@ class PlaylistController extends BaseController {
         try {
             $songs = $this->api->getPlaylistTracks($playlistID, $options);
 
-            $songs->items = array_map(function($item) {
-                $song = Song::createFromTrackDetails($item->track);
+            $songs["items"] = array_map(function($item) {
+                $song = new Song($item["track"]);
                 return $song->serializeToArray();
-            }, $songs->items);
+            }, $songs["items"]);
 
             return JsonResponse::create($songs);
         } catch (SpotifyWebAPIException $e) {

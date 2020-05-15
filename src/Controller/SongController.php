@@ -17,7 +17,7 @@ class SongController extends BaseController {
 
         try {
             $song = $this->api->getTrack($songID);
-            $song = Song::createFromTrackDetails($song);
+            $song = new Song($song);
             return JsonResponse::create($song->serializeToArray());
         } catch (SpotifyWebAPIException $e) {
             $errorDetails = $e->getReason() ?? $e->getMessage();
@@ -45,10 +45,10 @@ class SongController extends BaseController {
         try {
             $songs = $this->api->getRecommendations($options);
 
-            $songs->tracks = array_map(function($item) {
-                $song = Song::createFromTrackDetails($item);
+            $songs['tracks'] = array_map(function($item) {
+                $song = new Song($item);
                 return $song->serializeToArray();
-            }, $songs->tracks);
+            }, $songs['tracks']);
 
             return JsonResponse::create($songs);
         } catch (SpotifyWebAPIException $e) {
