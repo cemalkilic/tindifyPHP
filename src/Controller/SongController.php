@@ -57,4 +57,20 @@ class SongController extends BaseController {
         }
     }
 
+    public function getSavedSongs() {
+        try {
+            $songs = $this->api->getSavedSongs();
+
+            $songs['items'] = array_map(function($item) {
+                $song = new Song($item);
+                return $song->serializeToArray();
+            }, $songs['items']);
+
+            return JsonResponse::create($songs);
+        } catch (SpotifyWebAPIException $e) {
+            $errorDetails = $e->getReason() ?? $e->getMessage();
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

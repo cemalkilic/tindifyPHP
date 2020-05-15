@@ -91,6 +91,23 @@ class SpotifyAPIWrapper {
         return $songs;
     }
 
+    public function getSavedSongs($options = []) {
+        $defaultOptions = $this->getDefaultRequestOptions();
+
+        // Filter for needed fields
+        $defaultOptions['fields'] = $this->apiRequestFilter->getTrackFilters();
+
+        $options = array_merge($defaultOptions, $options);
+
+        $songs = $this->api->getMySavedTracks($options);
+        $songs['items'] = array_map(function ($item) {
+            $item = $this->apiResponseFilter->getSongFields($item["track"]);
+            return $item;
+        }, $songs['items']);
+
+        return $songs;
+    }
+
     private function setDefaultAPIOptions($options = []) {
         $defaultOptions = [
             "return_assoc" => true

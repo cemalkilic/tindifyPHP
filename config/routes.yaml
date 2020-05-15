@@ -43,6 +43,11 @@ get-recommended-songs:
   controller: App\Controller\SongController::getRecommendations
   methods:    POST
 
+get-saved-songs:
+  path:       /songs/saved
+  controller: App\Controller\SongController::getSavedSongs
+  methods:    GET
+
 get-a-song:
   path:       /songs/{id}
   controller: App\Controller\SongController::getSong
