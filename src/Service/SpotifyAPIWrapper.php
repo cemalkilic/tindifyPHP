@@ -127,6 +127,18 @@ class SpotifyAPIWrapper {
         return $songs;
     }
 
+    public function createTindifyPlaylist($options = []) {
+        $defaultOptions = [
+            "name" => "Tindify",
+            "public" => false,
+            "description" => "The songs you matched!"
+        ];
+
+        $options = $this->mergeOptionsArray($defaultOptions, $options);
+
+        return $this->api->createPlaylist($options);
+    }
+
     private function setDefaultAPIOptions($options = []) {
         $defaultOptions = [
             "return_assoc" => true

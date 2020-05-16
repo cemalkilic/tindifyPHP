@@ -26,17 +26,16 @@ class PlaylistController extends BaseController {
 
     public function createTindifyPlaylist(Request $request) {
 
-        $playlistName = $request->request->get("name") ?? "Tindify";
-        $isPublic     = $request->request->get("public") ?? false;
+        $playlistName = $request->request->get("name", null);
+        $isPublic     = $request->request->get("public", null);
 
         $playlistOptions = [
             "name"        => $playlistName,
             "public"      => $isPublic,
-            "description" => "The songs you matched!"
         ];
 
         try {
-            $content = $this->api->createPlaylist($playlistOptions);
+            $content = $this->api->createTindifyPlaylist($playlistOptions);
             return JsonResponse::create($content);
         } catch (SpotifyWebAPIException $e) {
             $errorDetails = $e->getReason() ?? $e->getMessage();
