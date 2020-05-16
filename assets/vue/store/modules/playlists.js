@@ -29,6 +29,10 @@ export const actions = {
             })
     },
     fetchSongsForPlaylist({ commit, dispatch }, playlistID) {
+        if (playlistID === "likedSongs") {
+            return dispatch('songs/getSavedSongs', {}, {root: true}).then(() => commit('SET_SELECTED_PLAYLIST', playlistID));
+        }
+
         return getSongsInPlaylist(playlistID)
             .then((resp) => {
                 if (resp.data.content && resp.data.content.items) {
