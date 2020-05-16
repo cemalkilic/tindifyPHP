@@ -26,6 +26,16 @@ playlist-create:
   controller: App\Controller\PlaylistController::createTindifyPlaylist
   methods:    POST
 
+add-song-to-tindifyPlaylist:
+  path:       /playlists/tindify/songs
+  controller: App\Controller\PlaylistController::addTindifyPlaylistSongs
+  methods:    POST
+
+get-songs-in-tindifyPlaylist:
+  path:       /playlists/tindify/songs
+  controller: App\Controller\PlaylistController::getTindifySongs
+  methods:    GET
+
 add-song-to-playlist:
   path:       /playlists/{id}/songs
   controller: App\Controller\PlaylistController::addSongsToPlaylist

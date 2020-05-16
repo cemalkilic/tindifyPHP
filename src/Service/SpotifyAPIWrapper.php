@@ -4,6 +4,7 @@
 namespace App\Service;
 
 
+use Doctrine\ORM\EntityManagerInterface;
 use SpotifyWebAPI\SpotifyWebAPI;
 
 class SpotifyAPIWrapper {
@@ -14,19 +15,31 @@ class SpotifyAPIWrapper {
     private $api;
     private $apiRequestFilter;
     private $apiResponseFilter;
+    private $em;
+    private $username;
 
     public function __construct(SpotifyWebAPI $spotifyWebAPI,
                                 SpotifyAPIRequestFilter $spotifyAPIRequestFilter,
-                                SpotifyAPIResponseFilter $spotifyAPIResponseFilter
+                                SpotifyAPIResponseFilter $spotifyAPIResponseFilter,
+                                EntityManagerInterface $entityManager
     ) {
         $this->api = $spotifyWebAPI;
         $this->apiRequestFilter = $spotifyAPIRequestFilter;
         $this->apiResponseFilter = $spotifyAPIResponseFilter;
+        $this->em = $entityManager;
         $this->setDefaultAPIOptions();
     }
 
     public function setAccessToken($accessToken) {
         $this->api->setAccessToken($accessToken);
+    }
+
+    public function setUsername($username) {
+        $this->username = $username;
+    }
+
+    public function getUsername() {
+        return $this->username;
     }
 
     public function getPlaylistTracks($playlistID, $options) {
@@ -143,6 +156,34 @@ class SpotifyAPIWrapper {
         $options["fields"] = $this->apiRequestFilter->getPlaylistMetaFilters();
 
         return $this->api->getPlaylist($playlistID, $options);
+    }
+
+    public function getTindifySongs($options = []) {
+        $tindifyPlaylistManager = new TindifyPlaylistManager($this->em, $this);
+        $tindifyPlaylist = $tindifyPlaylistManager->getTindifyPlaylist();
+
+        $defaultOptions = $this->getDefaultRequestOptions();
+
+        // Filter for needed fields
+        $defaultOptions['fields'] = $this->apiRequestFilter->getTrackFilters();
+        $options = $this->mergeOptionsArray($defaultOptions, $options);
+
+        $songs = $this->api->getPlaylistTracks($tindifyPlaylist->getPlaylistID(), $options);
+
+        $songs['items'] = array_map(function ($item) {
+            $item['track'] = $this->apiResponseFilter->getSongFields($item["track"]);
+            return $item;
+        }, $songs['items']);
+
+        return $songs;
+    }
+
+    public function addTindifyPlaylistSongs($songIDs) {
+        $tindifyPlaylistManager = new TindifyPlaylistManager($this->em, $this);
+
+        $tindifyPlaylist = $tindifyPlaylistManager->getTindifyPlaylist();
+
+        return $this->addPlaylistTracks($tindifyPlaylist->getPlaylistID(), $songIDs);
     }
 
     private function setDefaultAPIOptions($options = []) {

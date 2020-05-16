@@ -22,8 +22,8 @@ class BaseController extends AbstractController {
     }
 
     public function setupAPI() {
-        $accessToken = $this->getUser()->getAccessToken();
-        $this->api->setAccessToken($accessToken);
+        $this->api->setAccessToken($this->getUser()->getAccessToken());
+        $this->api->setUsername($this->getUser()->getUsername());
     }
 
 }
