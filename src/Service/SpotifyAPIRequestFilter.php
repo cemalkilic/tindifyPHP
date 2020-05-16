@@ -15,4 +15,10 @@ class SpotifyAPIRequestFilter {
         ];
     }
 
+    public function getPlaylistMetaFilters() {
+        return [
+            "id,name,owner(id),description"
+        ];
+    }
+
 }

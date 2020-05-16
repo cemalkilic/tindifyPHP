@@ -139,6 +139,12 @@ class SpotifyAPIWrapper {
         return $this->api->createPlaylist($options);
     }
 
+    public function getPlaylistMeta($playlistID) {
+        $options["fields"] = $this->apiRequestFilter->getPlaylistMetaFilters();
+
+        return $this->api->getPlaylist($playlistID, $options);
+    }
+
     private function setDefaultAPIOptions($options = []) {
         $defaultOptions = [
             "return_assoc" => true
