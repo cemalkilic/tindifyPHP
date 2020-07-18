@@ -172,8 +172,16 @@
                     this.audio.fade(0, volume, fadeTime);
                 }
             },
+            addTindifyPlaylistSong(songID) {
+                this.$store.dispatch("playlists/addTindifyPlaylistSong", songID)
+            },
             emitAndNext(event) {
                 this.$emit(event, this.index)
+                if (event === "match") {
+                    // send the song to Tindify playlist
+                    const songID = this.current.id;
+                    this.addTindifyPlaylistSong(songID);
+                }
                 setTimeout(() => this.isVisible = false, 200)
                 setTimeout(() => {
                     this.index++

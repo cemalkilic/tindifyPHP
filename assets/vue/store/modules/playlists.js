@@ -1,4 +1,4 @@
-import { getAllPlaylists, getSongsInPlaylist } from "@/api/playlists";
+import { getAllPlaylists, getSongsInPlaylist, addTindifyPlaylistSong } from "@/api/playlists";
 
 export const namespaced = true;
 
@@ -40,6 +40,12 @@ export const actions = {
                     dispatch('songs/setSongs', resp.data.content.items, {root: true});
                 }
             })
+    },
+    addTindifyPlaylistSong({ commit }, songID) {
+        return addTindifyPlaylistSong(songID)
+            .then((resp) => {
+               console.log("Song added, res: ", resp);
+            });
     }
 };
 export const getters = {

@@ -12,7 +12,14 @@ const getAllPlaylists = ({limit, offset}) => {
 };
 const getSongsInPlaylist = (playlistID) => httpClient.get(ENDPOINT + "/" + playlistID + "/songs");
 
+const addTindifyPlaylistSong = (songID) => {
+    return httpClient.post(ENDPOINT + "/tindify/songs", {
+        songIDs: songID,
+    });
+};
+
 export {
     getAllPlaylists,
-    getSongsInPlaylist
+    getSongsInPlaylist,
+    addTindifyPlaylistSong
 }
