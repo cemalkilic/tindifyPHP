@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="top">
         <h2>Tindify</h2>
         <nav>
             <router-link class="spacing" v-for="routes in links"
@@ -34,5 +34,8 @@
 <style>
     .spacing {
         margin-right: 10px;
+    }
+    .top {
+        height: 6vh;
     }
 </style>
