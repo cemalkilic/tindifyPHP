@@ -66,24 +66,10 @@ class SpotifyAPIWrapper {
         $defaultOptions = $this->getDefaultRequestOptions();
 
         $options = $this->mergeOptionsArray($defaultOptions, $options);
-        // will plug the liked songs as a playlist option
-        // if only offset = 0 (on initial request)
-        if ($options["offset"] === 0) {
-            $options["limit"]--;
-        }
+
+        // TODO: Support for "Liked songs"
 
         $playlists = $this->api->getMyPlaylists($options);
-
-        if ($options["offset"] === 0) {
-            // TODO set album cover
-            // for now copying an elem and overriding some values
-            $likedSongPlaylist = $playlists["items"][2];
-            $likedSongPlaylist["name"] = "Liked Songs";
-            $likedSongPlaylist["id"] = "likedSongs";
-            $likedSongPlaylist["tracks"]["total"] = 42;
-
-            array_unshift($playlists["items"], $likedSongPlaylist);
-        }
 
         // Placeholder image for empty album covers
         $playlists["items"] = array_map(function ($item) {
