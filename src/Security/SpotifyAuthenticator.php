@@ -93,7 +93,7 @@ class SpotifyAuthenticator implements AuthenticatorInterface {
         // user is authenticated, return it to homepage
         $authKey = $token->getAttribute("accessKey");
 
-        $response = new RedirectResponse("/", 302);
+        $response = new RedirectResponse("/#/playlists", 302);
         $response->headers->setCookie(Cookie::create(self::TOKEN_NAME, $authKey));
 
         return $response;
