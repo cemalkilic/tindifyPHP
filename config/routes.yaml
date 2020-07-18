@@ -36,6 +36,11 @@ get-songs-in-tindifyPlaylist:
   controller: App\Controller\PlaylistController::getTindifySongs
   methods:    GET
 
+get-recommendations-for-playlist:
+  path:       /playlists/{id}/recommendations
+  controller: App\Controller\PlaylistController::getRecommendations
+  methods:    GET
+
 add-song-to-playlist:
   path:       /playlists/{id}/songs
   controller: App\Controller\PlaylistController::addSongsToPlaylist

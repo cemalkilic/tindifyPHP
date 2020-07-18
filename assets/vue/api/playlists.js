@@ -18,8 +18,11 @@ const addTindifyPlaylistSong = (songID) => {
     });
 };
 
+const getPlaylistRecommendations = (playlistID) => httpClient.get(ENDPOINT + "/" + playlistID + "/recommendations");
+
 export {
     getAllPlaylists,
     getSongsInPlaylist,
-    addTindifyPlaylistSong
+    addTindifyPlaylistSong,
+    getPlaylistRecommendations
 }

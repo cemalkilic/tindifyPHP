@@ -193,6 +193,55 @@ class SpotifyAPIWrapper {
         return $this->addPlaylistTracks($tindifyPlaylist->getPlaylistID(), $songIDs);
     }
 
+    public function getPlaylistRecommendations($playlistID, $options = []) {
+        $seedSongsLimit = 5; // limit by Spotify API
+
+        $defaultOptions = $this->getDefaultRequestOptions();
+        $options = $this->mergeOptionsArray($defaultOptions, $options);
+
+        $playlistSongs = $this->getPlaylistTracks($playlistID);
+
+        // Playlist might have no songs
+        if (isset($playlistSongs["items"]) && empty($playlistSongs["items"])) {
+            return $playlistSongs;
+        }
+
+        $randomIndexes = [];
+
+        // Check playlist has songs more than limit
+        $playlistSongCount = count($playlistSongs["items"]);
+        if ($playlistSongCount > $seedSongsLimit) {
+            while (count($randomIndexes) !== $seedSongsLimit) {
+                $rand = random_int(0, count($playlistSongs["items"]) - 1);
+                if (!in_array($rand, $randomIndexes)) {
+                    $randomIndexes[] = $rand;
+                }
+            }
+        } else {
+            // select all indexes as random indexes
+            $randomIndexes = array_keys($playlistSongs["items"]);
+        }
+
+
+        // get the IDs for random selected index
+        $seedSongs = [];
+        foreach ($randomIndexes as $randomNumber) {
+            $seedSongs[] = $playlistSongs["items"][$randomNumber]["track"]["id"];
+        }
+
+        $options = $this->mergeOptionsArray($options, [
+            "seed_tracks" => $seedSongs
+        ]);
+
+        $recommendations = $this->getRecommendations($options);
+
+        // stay consistent with the array keys
+        $recommendations["items"] = $recommendations["tracks"];
+        unset($recommendations["tracks"]);
+
+        return $recommendations;
+    }
+
     private function setDefaultAPIOptions($options = []) {
         $defaultOptions = [
             "return_assoc" => true

@@ -1,4 +1,4 @@
-import { getAllPlaylists, getSongsInPlaylist, addTindifyPlaylistSong } from "@/api/playlists";
+import { getAllPlaylists, getSongsInPlaylist, addTindifyPlaylistSong, getPlaylistRecommendations } from "@/api/playlists";
 
 export const namespaced = true;
 
@@ -34,6 +34,15 @@ export const actions = {
         }
 
         return getSongsInPlaylist(playlistID)
+            .then((resp) => {
+                if (resp.data.content && resp.data.content.items) {
+                    commit('SET_SELECTED_PLAYLIST', playlistID);
+                    dispatch('songs/setSongs', resp.data.content.items, {root: true});
+                }
+            })
+    },
+    fetchPlaylistRecommendations({ commit, dispatch }, playlistID) {
+        return getPlaylistRecommendations(playlistID)
             .then((resp) => {
                 if (resp.data.content && resp.data.content.items) {
                     commit('SET_SELECTED_PLAYLIST', playlistID);

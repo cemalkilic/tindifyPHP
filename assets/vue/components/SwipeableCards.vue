@@ -1,10 +1,5 @@
 <template>
     <section class="container">
-        <div class="fixedgnu general license header">
-            <i class="material-icons" @click="index = 0">refresh</i>
-            <span>Tindify</span>
-            <i class="material-icons">tune</i>
-        </div>
         <div
                 v-if="current"
                 class="fixed fixed--center"
@@ -104,7 +99,7 @@
         beforeRouteEnter(to, from, next) {
             const playlistID = to.params.playlistID;
             if (playlistID) {
-                store.dispatch('playlists/fetchSongsForPlaylist', playlistID).then(() => {
+                store.dispatch('playlists/fetchPlaylistRecommendations', playlistID).then(() => {
                     next(vm => vm.initAudio());
                 });
             } else {

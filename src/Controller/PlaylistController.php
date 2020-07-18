@@ -123,4 +123,27 @@ class PlaylistController extends BaseController {
             return JsonResponse::create($errorDetails, JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function getRecommendations(Request $request) {
+
+        $playlistID = $request->attributes->get('id', null);
+        $limit      = $request->query->get("limit", null);
+        $offset     = $request->query->get("offset", null);
+
+        $options = compact('limit', 'offset');
+
+        try {
+            $songs = $this->api->getPlaylistRecommendations($playlistID, $options);
+
+            $songs["items"] = array_map(function($item) {
+                $song = new Song($item);
+                return $song->serializeToArray();
+            }, $songs["items"]);
+
+            return JsonResponse::create($songs);
+        } catch (SpotifyWebAPIException $e) {
+            $errorDetails = $e->getReason() ?? $e->getMessage();
+            return JsonResponse::create($errorDetails, JsonResponse::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
