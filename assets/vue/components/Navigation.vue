@@ -37,5 +37,6 @@
     }
     .top {
         height: 6vh;
+        text-align: center;
     }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="home">
         <h1>Welcome to Tindify!</h1>
         <h2>
             What if listening to music were as easy as romance?
@@ -36,5 +36,7 @@
     }
 </script>
 <style>
-
+    .home {
+        text-align: center;
+    }
 </style>
