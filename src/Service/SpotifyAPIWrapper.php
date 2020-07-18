@@ -42,7 +42,7 @@ class SpotifyAPIWrapper {
         return $this->username;
     }
 
-    public function getPlaylistTracks($playlistID, $options) {
+    public function getPlaylistTracks($playlistID, $options = []) {
 
         $defaultOptions = $this->getDefaultRequestOptions();
 
