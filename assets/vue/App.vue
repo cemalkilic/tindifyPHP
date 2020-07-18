@@ -1,7 +1,7 @@
 <template>
     <div id="app">
         <Navigation></Navigation>
-        <router-view/>
+        <router-view class="fullWidth"/>
     </div>
 </template>
 
@@ -24,5 +24,8 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         color: #2c3e50;
+    }
+    .fullWidth {
+        max-width: 100%;
     }
 </style>
