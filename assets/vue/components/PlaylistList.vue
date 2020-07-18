@@ -3,7 +3,7 @@
         <b-list-group-item
                 v-for="playlist in playlists"
                 :key="playlist.id"
-                @click="goCards(playlist.id)"
+                @click.once="goCards(playlist.id)"
                 button
         >
             <b-img fluid thumbnail left :src="playlist.images[0].url" :alt="playlist.name" width="160"></b-img>
