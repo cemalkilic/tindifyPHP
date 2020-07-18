@@ -85,6 +85,14 @@ class SpotifyAPIWrapper {
             array_unshift($playlists["items"], $likedSongPlaylist);
         }
 
+        // Placeholder image for empty album covers
+        $playlists["items"] = array_map(function ($item) {
+            if (empty($item["images"])) {
+                $item["images"][0]["url"] = "https://via.placeholder.com/300";
+            }
+            return $item;
+        }, $playlists["items"]);
+
         return $playlists;
     }
 
