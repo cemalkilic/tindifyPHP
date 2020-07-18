@@ -29,12 +29,6 @@ class UserProvider implements UserProviderInterface {
     }
 
     /**
-     * Symfony calls this method if you use features like switch_user
-     * or remember_me.
-     *
-     * If you're not using these features, you do not need to implement
-     * this method.
-     *
      * @return UserInterface
      *
      * @throws UsernameNotFoundException if the user is not found
@@ -57,7 +51,40 @@ class UserProvider implements UserProviderInterface {
             throw new UsernameNotFoundException("No spotify token found for the user!");
         }
 
-        return new User($userID, $userSpotifyTokens->getAccessToken());
+        $user = new User($userID, $userSpotifyTokens->getAccessToken());
+        $currentTime = new \DateTime();
+        $diff = $currentTime->diff($userSpotifyTokens->getTokenExpire());
+
+        // if there is less than 10 minutes or token has already expired,
+        // let's refresh the token
+        if ($diff->invert || $diff->i < self::TOKEN_REFRESH_THRESHOLD) {
+
+            // refresh the token and store the new ones
+            $spotifySession = new \SpotifyWebAPI\Session(
+                $this->params->get('spotifyApi.clientID'),
+                $this->params->get('spotifyApi.clientSecret'),
+                $this->params->get('spotifyApi.redirectUri')
+            );
+
+            $isRefreshed = $spotifySession->refreshAccessToken($userSpotifyTokens->getRefreshToken());
+            if (!$isRefreshed) {
+                throw new UsernameNotFoundException("Can not refresh Spotify token!");
+            }
+
+            $userSpotifyTokens = new UserSpotifyTokens();
+            $userSpotifyTokens->setSpotifyUserID($userID);
+            $userSpotifyTokens->setAccessToken($spotifySession->getAccessToken());
+            $userSpotifyTokens->setTokenExpire(new \DateTime('@' . $spotifySession->getTokenExpiration()));
+            $userSpotifyTokens->setRefreshToken($spotifySession->getRefreshToken());
+            $userSpotifyTokens->setCreatedAt(new \DateTime());
+
+            $userTokenPersister = new UserTokenPersister($this->em);
+            $userTokenPersister->persistSpotifyTokens($userSpotifyTokens);
+
+            $user->setAccessToken($spotifySession->getAccessToken());
+        }
+
+        return $user;
     }
 
     /**
@@ -76,48 +103,6 @@ class UserProvider implements UserProviderInterface {
     public function refreshUser(UserInterface $user) {
         if (!$user instanceof User) {
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
-        }
-
-        // check if current token is about to expire
-        $spotifyUserID = $user->getUsername();
-
-        $spotifyTokens = $this->em->getRepository(UserSpotifyTokens::class)->find($spotifyUserID);
-
-        if (!isset($spotifyTokens)) {
-            throw new UnsupportedUserException("No spotify keys found!");
-        }
-
-        $currentTime = new \DateTime();
-        $diff = $currentTime->diff($spotifyTokens->getTokenExpire());
-
-        // if there is less than 10 minutes or token has already expired,
-        // let's refresh the token
-        if ($diff->invert || $diff->i < self::TOKEN_REFRESH_THRESHOLD) {
-            // refresh the token and store the new ones
-
-            $spotifySession = new \SpotifyWebAPI\Session(
-                $this->params->get('spotifyApi.clientID'),
-                $this->params->get('spotifyApi.clientSecret'),
-                $this->params->get('spotifyApi.redirectUri')
-            );
-
-            $isRefreshed = $spotifySession->refreshAccessToken($spotifyTokens->getRefreshToken());
-            if (!$isRefreshed) {
-                // TODO no need to throw exception but fine for now
-                throw new UsernameNotFoundException("Can not refresh the tokens!");
-            }
-
-            $spotifyTokens = new UserSpotifyTokens();
-            $spotifyTokens->setSpotifyUserID($spotifyUserID);
-            $spotifyTokens->setAccessToken($spotifySession->getAccessToken());
-            $spotifyTokens->setTokenExpire(new \DateTime('@' . $spotifySession->getTokenExpiration()));
-            $spotifyTokens->setRefreshToken($spotifySession->getRefreshToken());
-            $spotifyTokens->setCreatedAt(new \DateTime());
-
-            $userTokenPersister = new UserTokenPersister($this->em);
-            $userTokenPersister->persistSpotifyTokens($spotifyTokens);
-
-            $user->setAccessToken($spotifySession->getAccessToken());
         }
 
         return $user;
